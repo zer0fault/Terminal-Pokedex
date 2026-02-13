@@ -1,29 +1,19 @@
 """Moves tab with a sortable DataTable."""
-from textual.app import ComposeResult
-from textual.containers import Vertical
 from textual.widgets import DataTable
 
 from src.models.pokemon import PokemonMoveRef
 from src.models.move import Move
 
 
-class MovesTab(Vertical):
+class MovesTab(DataTable):
     """Tab content showing a Pokemon's move list in a DataTable."""
 
     def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
+        super().__init__(cursor_type="row", zebra_stripes=True, **kwargs)
         self._move_details: dict[str, Move] = {}
 
-    def compose(self) -> ComposeResult:
-        table = DataTable(id="moves-table", cursor_type="row", zebra_stripes=True)
-        yield table
-
     def on_mount(self) -> None:
-        table = self.query_one("#moves-table", DataTable)
-        table.add_columns("Move", "Type", "Power", "Acc", "PP", "Level", "Method")
-        table.show_header = True
-        table.fixed_rows = 0
-        table.zebra_stripes = True
+        self.add_columns("Move", "Type", "Power", "Acc", "PP", "Level", "Method")
 
     def load_moves(
         self,
@@ -31,12 +21,10 @@ class MovesTab(Vertical):
         move_details: dict[str, Move] | None = None,
     ) -> None:
         """Populate the moves DataTable."""
-        # Notify that we're loading
-        self.app.notify(f"MovesTab.load_moves called with {len(moves)} moves", timeout=3)
+        self.app.notify(f"Loading {len(moves)} moves into table", timeout=2)
 
-        table = self.query_one("#moves-table", DataTable)
-        # Clear rows but keep columns
-        table.clear(columns=False)
+        # Clear existing rows
+        self.clear(columns=False)
         self._move_details = move_details or {}
 
         level_up = sorted(
@@ -48,7 +36,6 @@ class MovesTab(Vertical):
             key=lambda m: (m.learn_method, m.name),
         )
 
-        rows_added = 0
         for move in level_up + others:
             name = move.name.replace("-", " ").title()
             level = str(move.level_learned_at) if move.level_learned_at > 0 else "-"
@@ -67,11 +54,6 @@ class MovesTab(Vertical):
                 accuracy = "-"
                 pp = "-"
 
-            table.add_row(name, move_type, power, accuracy, pp, level, method)
-            rows_added += 1
+            self.add_row(name, move_type, power, accuracy, pp, level, method)
 
-        # Force refresh of table and container
-        table.refresh()
-        self.refresh()
-
-        self.app.notify(f"Added {rows_added} rows. Table has {table.row_count} rows", timeout=3)
+        self.app.notify(f"✓ Table now has {self.row_count} rows", timeout=2)

@@ -1,27 +1,34 @@
 """Moves tab with a sortable DataTable."""
+from textual.app import ComposeResult
+from textual.containers import VerticalScroll
 from textual.widgets import DataTable
 
 from src.models.pokemon import PokemonMoveRef
 from src.models.move import Move
 
 
-class MovesTab(DataTable):
+class MovesTab(VerticalScroll):
     """Tab content showing a Pokemon's move list in a DataTable."""
 
     def __init__(self, **kwargs) -> None:
-        super().__init__(
+        super().__init__(**kwargs)
+        self._move_details: dict[str, Move] = {}
+        self._table: DataTable | None = None
+
+    def compose(self) -> ComposeResult:
+        self._table = DataTable(
             cursor_type="row",
             zebra_stripes=True,
             show_header=True,
-            show_row_labels=False,
-            **kwargs
         )
-        self._move_details: dict[str, Move] = {}
+        yield self._table
 
     def on_mount(self) -> None:
-        self.add_columns("Move", "Type", "Power", "Acc", "PP", "Level", "Method")
-        # Add a test row to verify display works
-        self.add_row("TEST", "Fire", "100", "95", "15", "1", "Level Up")
+        if self._table:
+            self._table.add_columns("Move", "Type", "Power", "Acc", "PP", "Level", "Method")
+            # Add test row
+            self._table.add_row("TEST", "Fire", "100", "95", "15", "1", "Level Up")
+            self.app.notify("Test row added to moves table", timeout=3)
 
     def load_moves(
         self,
@@ -29,10 +36,14 @@ class MovesTab(DataTable):
         move_details: dict[str, Move] | None = None,
     ) -> None:
         """Populate the moves DataTable."""
-        self.app.notify(f"Loading {len(moves)} moves into table", timeout=2)
+        if not self._table:
+            self.app.notify("ERROR: Table not found!", severity="error", timeout=5)
+            return
+
+        self.app.notify(f"Loading {len(moves)} moves", timeout=2)
 
         # Clear existing rows
-        self.clear(columns=False)
+        self._table.clear(columns=False)
         self._move_details = move_details or {}
 
         level_up = sorted(
@@ -49,7 +60,6 @@ class MovesTab(DataTable):
             level = str(move.level_learned_at) if move.level_learned_at > 0 else "-"
             method = move.learn_method.replace("-", " ").title()
 
-            # Get move details if available
             detail = self._move_details.get(move.name)
             if detail:
                 move_type = detail.type_name.title()
@@ -62,6 +72,6 @@ class MovesTab(DataTable):
                 accuracy = "-"
                 pp = "-"
 
-            self.add_row(name, move_type, power, accuracy, pp, level, method)
+            self._table.add_row(name, move_type, power, accuracy, pp, level, method)
 
-        self.app.notify(f"✓ Table now has {self.row_count} rows", timeout=2)
+        self.app.notify(f"✓ Table has {self._table.row_count} rows", timeout=2)

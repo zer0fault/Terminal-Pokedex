@@ -1,50 +1,54 @@
-"""Moves tab with a sortable DataTable."""
+"""Moves tab showing move list as a Rich Table."""
 from textual.app import ComposeResult
 from textual.containers import VerticalScroll
-from textual.widgets import DataTable
+from textual.widgets import Static
+from rich.table import Table
+from rich.text import Text
 
 from src.models.pokemon import PokemonMoveRef
 from src.models.move import Move
 
 
 class MovesTab(VerticalScroll):
-    """Tab content showing a Pokemon's move list in a DataTable."""
+    """Tab content showing a Pokemon's move list."""
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self._move_details: dict[str, Move] = {}
-        self._table: DataTable | None = None
 
     def compose(self) -> ComposeResult:
-        self._table = DataTable(
-            cursor_type="row",
-            zebra_stripes=True,
-            show_header=True,
-        )
-        yield self._table
-
-    def on_mount(self) -> None:
-        if self._table:
-            self._table.add_columns("Move", "Type", "Power", "Acc", "PP", "Level", "Method")
-            # Add test row
-            self._table.add_row("TEST", "Fire", "100", "95", "15", "1", "Level Up")
-            self.app.notify("Test row added to moves table", timeout=3)
+        yield Static("Select a Pokemon to view moves", id="moves-content")
 
     def load_moves(
         self,
         moves: list[PokemonMoveRef],
         move_details: dict[str, Move] | None = None,
     ) -> None:
-        """Populate the moves DataTable."""
-        if not self._table:
-            self.app.notify("ERROR: Table not found!", severity="error", timeout=5)
+        """Populate the moves table."""
+        content = self.query_one("#moves-content", Static)
+        self._move_details = move_details or {}
+
+        if not moves:
+            content.update("[dim]No moves found.[/dim]")
             return
 
-        self.app.notify(f"Loading {len(moves)} moves", timeout=2)
+        table = Table(
+            title=None,
+            show_header=True,
+            header_style="bold white on #dc0a2d",
+            border_style="#45475a",
+            row_styles=["on #1e1e2e", "on #181825"],
+            expand=True,
+            pad_edge=False,
+        )
 
-        # Clear existing rows
-        self._table.clear(columns=False)
-        self._move_details = move_details or {}
+        table.add_column("Move", style="bold", min_width=16)
+        table.add_column("Type", min_width=8)
+        table.add_column("Power", justify="right", min_width=5)
+        table.add_column("Acc", justify="right", min_width=5)
+        table.add_column("PP", justify="right", min_width=4)
+        table.add_column("Lvl", justify="right", min_width=4)
+        table.add_column("Method", min_width=10)
 
         level_up = sorted(
             [m for m in moves if m.learn_method == "level-up"],
@@ -72,6 +76,6 @@ class MovesTab(VerticalScroll):
                 accuracy = "-"
                 pp = "-"
 
-            self._table.add_row(name, move_type, power, accuracy, pp, level, method)
+            table.add_row(name, move_type, power, accuracy, pp, level, method)
 
-        self.app.notify(f"✓ Table has {self._table.row_count} rows", timeout=2)
+        content.update(table)

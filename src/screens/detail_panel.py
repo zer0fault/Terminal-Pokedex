@@ -124,6 +124,8 @@ class DetailPanel(Vertical):
 
     def load_move_details(self, detail: PokemonDetail, move_details: dict[str, Move]) -> None:
         """Load move details into the Moves tab."""
+        if not move_details:
+            return
         moves_tab = self.query_one(MovesTab)
         moves_tab.load_moves(detail.moves, move_details)
 

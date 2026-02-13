@@ -35,7 +35,8 @@ class MovesTab(Vertical):
         self.app.notify(f"MovesTab.load_moves called with {len(moves)} moves", timeout=3)
 
         table = self.query_one("#moves-table", DataTable)
-        table.clear()
+        # Clear rows but keep columns
+        table.clear(columns=False)
         self._move_details = move_details or {}
 
         level_up = sorted(

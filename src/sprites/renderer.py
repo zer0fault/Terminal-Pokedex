@@ -12,7 +12,7 @@ class SpriteRenderer:
 
     @staticmethod
     def render(sprite_path: Path, width: int = SPRITE_RENDER_WIDTH) -> Pixels | None:
-        """Render a sprite file to a Pixels object."""
+        """Render a sprite file to a Pixels object at original size."""
         try:
             with Image.open(sprite_path) as img:
                 if img.mode == "RGBA":
@@ -22,14 +22,8 @@ class SpriteRenderer:
                 elif img.mode != "RGB":
                     img = img.convert("RGB")
 
-                # Keep sprites small for sharper rendering
-                # Terminal characters are roughly 2:1 (height:width)
-                aspect = img.height / img.width
-                height = int(width * aspect * 0.5)
-
-                # Use NEAREST for pixel-perfect scaling
-                img = img.resize((width, height), Image.Resampling.NEAREST)
-
+                # Render at original sprite size (96x96 for Pokemon sprites)
+                # No resizing - keep pixel-perfect
                 return Pixels.from_image(img)
         except Exception:
             return None

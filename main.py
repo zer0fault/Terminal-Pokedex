@@ -118,15 +118,19 @@ class PokedexApp(App):
 
             # Fetch move details for first 20 moves (to avoid too many API calls)
             move_details = {}
+            self.log.info(f"Fetching move details for {len(detail.moves[:20])} moves...")
             for move_ref in detail.moves[:20]:
                 try:
                     move = await self._cache.get_move(move_ref.name)
                     move_details[move_ref.name] = move
+                    self.log.info(f"✓ Loaded move: {move_ref.name} - {move.type_name}/{move.power}")
                 except Exception as e:
-                    self.log.warning(f"Failed to fetch move {move_ref.name}: {e}")
+                    self.log.error(f"✗ Failed to fetch move {move_ref.name}: {e}")
+                    import traceback
+                    self.log.error(traceback.format_exc())
 
-            if move_details:
-                detail_panel.load_move_details(detail, move_details)
+            self.log.info(f"Total moves loaded: {len(move_details)}")
+            detail_panel.load_move_details(detail, move_details)
 
             # Fetch type effectiveness data
             type_data = {}

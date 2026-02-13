@@ -21,7 +21,6 @@ class SpriteDisplay(Vertical):
         with Horizontal(id="sprite-controls"):
             yield Button("Normal", id="btn-normal", variant="primary", classes="sprite-btn")
             yield Button("Shiny", id="btn-shiny", classes="sprite-btn")
-            yield Button("Back", id="btn-back", classes="sprite-btn")
         yield Static("", id="sprite-image")
 
     def set_sprites(self, sprites: dict[str, Pixels | None]) -> None:
@@ -58,22 +57,15 @@ class SpriteDisplay(Vertical):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle sprite variant button presses."""
-        btn_id = event.button.id
-
         # Update button variants
         for btn in self.query(Button):
             btn.variant = "default"
         event.button.variant = "primary"
 
-        # Determine which sprite to show
+        # Determine which sprite to show (only normal or shiny)
         is_shiny = self.query_one("#btn-shiny", Button).variant == "primary"
-        is_back = self.query_one("#btn-back", Button).variant == "primary"
 
-        if is_back and is_shiny:
-            self._current_variant = "back_shiny"
-        elif is_back:
-            self._current_variant = "back_default"
-        elif is_shiny:
+        if is_shiny:
             self._current_variant = "front_shiny"
         else:
             self._current_variant = "front_default"

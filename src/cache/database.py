@@ -59,11 +59,31 @@ class CacheDatabase:
                 cached_at REAL NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS move (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                data_json TEXT NOT NULL,
+                cached_at REAL NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS type (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                data_json TEXT NOT NULL,
+                cached_at REAL NOT NULL
+            );
+
             CREATE INDEX IF NOT EXISTS idx_pokemon_list_name
                 ON pokemon_list(name);
 
             CREATE INDEX IF NOT EXISTS idx_ability_name
                 ON ability(name);
+
+            CREATE INDEX IF NOT EXISTS idx_move_name
+                ON move(name);
+
+            CREATE INDEX IF NOT EXISTS idx_type_name
+                ON type(name);
         """)
         await self._db.commit()
 

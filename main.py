@@ -122,10 +122,11 @@ class PokedexApp(App):
                 try:
                     move = await self._cache.get_move(move_ref.name)
                     move_details[move_ref.name] = move
-                except Exception:
-                    pass
+                except Exception as e:
+                    self.log.warning(f"Failed to fetch move {move_ref.name}: {e}")
 
-            detail_panel.load_move_details(detail, move_details)
+            if move_details:
+                detail_panel.load_move_details(detail, move_details)
 
             # Fetch type effectiveness data
             type_data = {}
@@ -133,10 +134,11 @@ class PokedexApp(App):
                 try:
                     type_info = await self._cache.get_type(poke_type.name)
                     type_data[poke_type.name] = type_info
-                except Exception:
-                    pass
+                except Exception as e:
+                    self.log.warning(f"Failed to fetch type {poke_type.name}: {e}")
 
-            detail_panel.load_type_matchups(detail, type_data)
+            if type_data:
+                detail_panel.load_type_matchups(detail, type_data)
 
         except Exception as e:
             self.notify(f"Error loading Pokemon: {e}", severity="error", timeout=5)

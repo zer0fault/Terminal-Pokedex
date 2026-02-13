@@ -105,17 +105,18 @@ SpriteDisplay {
 #sprite-controls {
     height: 3;
     width: 100%;
+    align: center middle;
 }
 
 #sprite-controls Button {
-    min-width: 8;
-    max-width: 12;
-    height: 1;
+    min-width: 12;
+    height: 3;
+    margin: 0 1;
 }
 
 #sprite-image {
     height: auto;
-    max-height: 23;
+    max-height: 24;
     overflow: hidden;
 }
 

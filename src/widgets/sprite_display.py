@@ -10,30 +10,7 @@ from rich.text import Text
 class SpriteDisplay(Vertical):
     """Displays a Pokemon sprite using half-block pixel rendering with variant toggles."""
 
-    DEFAULT_CSS = """
-    SpriteDisplay {
-        width: 44;
-        height: auto;
-        max-height: 30;
-        padding: 0 1;
-    }
-
-    #sprite-controls {
-        height: 3;
-        width: 100%;
-    }
-
-    #sprite-controls Button {
-        min-width: 10;
-        height: 1;
-        margin: 0 1;
-    }
-
-    #sprite-image {
-        height: auto;
-        max-height: 25;
-    }
-    """
+    # Note: Main styling defined in pokedex.tcss for consistency
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)

@@ -118,24 +118,15 @@ class PokedexApp(App):
 
             # Fetch move details for first 20 moves (to avoid too many API calls)
             move_details = {}
-            move_count = len(detail.moves[:20])
-            self.notify(f"Loading {move_count} moves...", timeout=2)
-
             for move_ref in detail.moves[:20]:
                 try:
                     move = await self._cache.get_move(move_ref.name)
                     move_details[move_ref.name] = move
-                except Exception as e:
-                    # Show first error as notification
-                    if len(move_details) == 0:
-                        self.notify(f"Move load error: {str(e)[:50]}", severity="error", timeout=5)
-                    break  # Stop on first error to avoid spam
+                except Exception:
+                    pass  # Silently skip failed moves
 
             if move_details:
-                self.notify(f"✓ Loaded {len(move_details)} move details", timeout=2)
                 detail_panel.load_move_details(detail, move_details)
-            else:
-                self.notify("⚠ No move details loaded - check connection", severity="warning", timeout=5)
 
             # Fetch type effectiveness data
             type_data = {}

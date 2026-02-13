@@ -76,18 +76,22 @@ def parse_pokemon_detail(data: dict[str, Any]) -> PokemonDetail:
             ))
 
     sprite_data = data.get("sprites", {})
-    sprite_url = sprite_data.get("front_default")
+
+    # Use official artwork for higher quality sprites (475x475 vs 96x96)
+    official_artwork = sprite_data.get("other", {}).get("official-artwork", {})
 
     sprites = PokemonSprites(
-        front_default=sprite_data.get("front_default"),
-        front_shiny=sprite_data.get("front_shiny"),
-        front_female=sprite_data.get("front_female"),
+        front_default=official_artwork.get("front_default") or sprite_data.get("front_default"),
+        front_shiny=official_artwork.get("front_shiny") or sprite_data.get("front_shiny"),
+        front_female=sprite_data.get("front_female"),  # No official artwork for female variants
         front_shiny_female=sprite_data.get("front_shiny_female"),
-        back_default=sprite_data.get("back_default"),
+        back_default=sprite_data.get("back_default"),  # No official artwork for back sprites
         back_shiny=sprite_data.get("back_shiny"),
         back_female=sprite_data.get("back_female"),
         back_shiny_female=sprite_data.get("back_shiny_female"),
     )
+
+    sprite_url = sprites.front_default
 
     held_items = []
     for item_data in data.get("held_items", []):

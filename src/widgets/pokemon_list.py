@@ -81,11 +81,7 @@ class PokemonListPanel(Vertical):
         option_list.clear_options()
 
         for pokemon in self._filtered_pokemon:
-            types = self._pokemon_types.get(pokemon.id, [])
-            type_str = "/".join(
-                TYPE_ABBREVIATIONS.get(t, "???") for t in types
-            ) if types else ""
-            label = f"#{pokemon.id:04d} {pokemon.name.title():<14} {type_str}"
+            label = f"#{pokemon.id:04d} {pokemon.name.title()}"
             option_list.add_option(Option(label, id=str(pokemon.id)))
 
         status = self.query_one("#list-status", Static)

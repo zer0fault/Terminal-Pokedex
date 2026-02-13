@@ -4,7 +4,7 @@ from pathlib import Path
 from PIL import Image
 from rich_pixels import Pixels
 
-from src.constants import SPRITE_RENDER_WIDTH, SPRITE_BG_COLOR
+from src.constants import SPRITE_RENDER_WIDTH
 
 
 class SpriteRenderer:
@@ -12,19 +12,24 @@ class SpriteRenderer:
 
     @staticmethod
     def render(sprite_path: Path, width: int = SPRITE_RENDER_WIDTH) -> Pixels | None:
-        """Render a sprite file to Pixels."""
+        """Render a sprite file to Pixels.
+
+        Uses NEAREST neighbor resampling to preserve pixel art sharpness,
+        and keeps RGBA transparency so the terminal background shows through.
+        """
         try:
             img = Image.open(sprite_path)
 
-            # Convert to RGB, handling transparency
-            if img.mode == "RGBA":
-                rgb_img = Image.new("RGB", img.size, SPRITE_BG_COLOR)
-                rgb_img.paste(img, mask=img.split()[3])
-                img = rgb_img
-            elif img.mode != "RGB":
-                img = img.convert("RGB")
+            # Convert to RGBA to preserve transparency
+            if img.mode != "RGBA":
+                img = img.convert("RGBA")
 
-            # Return as Pixels (no resizing - use original size)
+            # Resize to fit terminal, maintaining aspect ratio
+            # NEAREST keeps pixel art sharp (no blurring)
+            ratio = width / img.width
+            new_height = int(img.height * ratio)
+            img = img.resize((width, new_height), Image.NEAREST)
+
             pixels = Pixels.from_image(img)
             img.close()
             return pixels

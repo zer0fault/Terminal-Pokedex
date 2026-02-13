@@ -1,6 +1,6 @@
 # Terminal Pokedex
 
-A beautiful terminal user interface (TUI) for browsing Pokemon data using the PokeAPI.
+A terminal user interface (TUI) for browsing Pokemon data using the PokeAPI.
 
 ## Features
 

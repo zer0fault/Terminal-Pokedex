@@ -1,0 +1,132 @@
+"""Terminal Pokedex - A TUI for browsing Pokemon data."""
+import asyncio
+from pathlib import Path
+
+from textual.app import App, ComposeResult
+from textual.containers import Horizontal
+from textual.widgets import Header, Footer
+from textual.binding import Binding
+
+from src.widgets.pokemon_list import PokemonListPanel
+from src.screens.detail_panel import DetailPanel
+from src.cache.manager import CacheManager
+from src.sprites.downloader import SpriteDownloader
+from src.sprites.renderer import SpriteRenderer
+from src.constants import APP_NAME, APP_VERSION, DATA_DIR, SPRITES_DIR
+
+
+class PokedexApp(App):
+    """Terminal Pokedex TUI application."""
+
+    CSS_PATH = "styles/pokedex.tcss"
+    TITLE = f"{APP_NAME} v{APP_VERSION}"
+
+    BINDINGS = [
+        Binding("q", "quit", "Quit", priority=True),
+        Binding("ctrl+c", "quit", "Quit", show=False),
+        ("?", "help", "Help"),
+    ]
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._cache = CacheManager()
+        self._sprite_downloader = SpriteDownloader()
+        self._sprite_renderer = SpriteRenderer()
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        with Horizontal(id="main-layout"):
+            yield PokemonListPanel()
+            yield DetailPanel()
+        yield Footer()
+
+    async def on_mount(self) -> None:
+        """Initialize the app and load Pokemon list."""
+        DATA_DIR.mkdir(exist_ok=True)
+        SPRITES_DIR.mkdir(exist_ok=True)
+
+        await self._cache.initialize()
+        pokemon_list = await self._cache.get_pokemon_list()
+
+        list_panel = self.query_one(PokemonListPanel)
+        list_panel.load_pokemon(pokemon_list)
+
+        self._load_metadata_in_background(pokemon_list)
+
+    def _load_metadata_in_background(self, pokemon_list) -> None:
+        """Load type and generation data for all Pokemon in the background."""
+        async def load_metadata():
+            list_panel = self.query_one(PokemonListPanel)
+            for pokemon in pokemon_list[:50]:  # Load first 50 for now
+                try:
+                    detail = await self._cache.get_pokemon_detail(pokemon.id)
+                    species = await self._cache.get_species(pokemon.id)
+                    type_names = [t.name for t in detail.types]
+                    list_panel.set_type_data(pokemon.id, type_names)
+                    list_panel.set_gen_data(pokemon.id, species.generation)
+                except Exception:
+                    pass
+
+        asyncio.create_task(load_metadata())
+
+    async def on_pokemon_list_panel_pokemon_selected(
+        self, event: PokemonListPanel.PokemonSelected
+    ) -> None:
+        """Handle Pokemon selection from the list."""
+        detail_panel = self.query_one(DetailPanel)
+
+        try:
+            detail = await self._cache.get_pokemon_detail(event.pokemon_id)
+            species = await self._cache.get_species(event.pokemon_id)
+
+            sprite_path = SPRITES_DIR / f"{event.pokemon_id}.png"
+            if not sprite_path.exists() and detail.sprite_url:
+                await self._sprite_downloader.download_sprite(
+                    detail.sprite_url, sprite_path
+                )
+
+            sprite_pixels = None
+            if sprite_path.exists():
+                sprite_pixels = self._sprite_renderer.render(sprite_path)
+
+            detail_panel.load_pokemon(detail, species, sprite_pixels)
+
+            chain_id = species.evolution_chain_id
+            if chain_id:
+                evolution_chain = await self._cache.get_evolution_chain(chain_id)
+                detail_panel.load_evolution(evolution_chain, event.pokemon_name)
+
+            ability_details = {}
+            for ability_ref in detail.abilities:
+                try:
+                    ability = await self._cache.get_ability(ability_ref.name)
+                    ability_details[ability_ref.name] = ability
+                except Exception:
+                    pass
+
+            detail_panel.load_abilities(detail, ability_details)
+
+        except Exception as e:
+            self.notify(f"Error loading Pokemon: {e}", severity="error", timeout=5)
+
+    async def on_unmount(self) -> None:
+        """Clean up resources."""
+        await self._cache.close()
+
+    def action_help(self) -> None:
+        """Show help information."""
+        self.notify(
+            "Use arrow keys to navigate, Enter to select, / to search, q to quit",
+            title="Help",
+            timeout=5,
+        )
+
+
+def main():
+    """Run the Pokedex app."""
+    app = PokedexApp()
+    app.run()
+
+
+if __name__ == "__main__":
+    main()

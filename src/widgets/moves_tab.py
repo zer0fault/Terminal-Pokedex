@@ -54,9 +54,10 @@ class MovesTab(Vertical):
                 accuracy = str(detail.accuracy) if detail.accuracy else "-"
                 pp = str(detail.pp)
             else:
-                move_type = "?"
-                power = "?"
-                accuracy = "?"
-                pp = "?"
+                # Show basic info even without detailed move data
+                move_type = "-"
+                power = "-"
+                accuracy = "-"
+                pp = "-"
 
             table.add_row(name, move_type, power, accuracy, pp, level, method)

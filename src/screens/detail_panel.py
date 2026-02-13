@@ -97,8 +97,9 @@ class DetailPanel(Vertical):
         stats_tab = self.query_one(StatsTab)
         stats_tab.load_stats(detail.stats)
 
-        moves_tab = self.query_one(MovesTab)
-        moves_tab.load_moves(detail.moves)
+        # Don't load moves here - wait for move_details to be fetched
+        # moves_tab = self.query_one(MovesTab)
+        # moves_tab.load_moves(detail.moves)
 
         if species:
             breeding_tab = self.query_one(BreedingTab)

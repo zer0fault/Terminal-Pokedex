@@ -2,17 +2,19 @@
 from src.api.client import PokeAPIClient
 from src.api.endpoints import (
     pokemon_list_url, pokemon_detail_url, species_url,
-    evolution_chain_url, ability_url,
+    evolution_chain_url, ability_url, move_url, type_url,
 )
 from src.api.parsers import (
     parse_pokemon_list, parse_pokemon_detail, parse_pokemon_species,
-    parse_evolution_chain, parse_ability,
+    parse_evolution_chain, parse_ability, parse_move, parse_type_effectiveness,
 )
 from src.cache.database import CacheDatabase
 from src.models.pokemon import PokemonSummary, PokemonDetail
 from src.models.species import PokemonSpecies
 from src.models.evolution import EvolutionChain
 from src.models.ability import Ability
+from src.models.move import Move
+from src.models.type_info import TypeEffectiveness
 from src.constants import (
     CACHE_TTL_POKEMON_DETAIL, CACHE_TTL_SPECIES,
     CACHE_TTL_EVOLUTION, CACHE_TTL_ABILITY,
@@ -97,6 +99,26 @@ class CacheManager:
             "ability", ability.id, data, name=ability_name
         )
         return ability
+
+    async def get_move(self, move_name: str) -> Move:
+        """Get move details (cached)."""
+        await self.initialize()
+        data = await self._api.get_json(move_url(move_name))
+        move = parse_move(data)
+        await self._db.save_cached_json(
+            "move", move.id, data, name=move_name
+        )
+        return move
+
+    async def get_type(self, type_name: str) -> TypeEffectiveness:
+        """Get type effectiveness data (cached)."""
+        await self.initialize()
+        data = await self._api.get_json(type_url(type_name))
+        type_eff = parse_type_effectiveness(data)
+        await self._db.save_cached_json(
+            "type", type_eff.id, data, name=type_name
+        )
+        return type_eff
 
     async def close(self) -> None:
         """Clean up resources."""

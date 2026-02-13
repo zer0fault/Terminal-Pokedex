@@ -24,3 +24,11 @@ def ability_url(id_or_name: int | str) -> str:
 
 def sprite_url(pokemon_id: int) -> str:
     return f"{SPRITE_BASE_URL}/{pokemon_id}.png"
+
+
+def move_url(id_or_name: int | str) -> str:
+    return f"{POKEAPI_BASE_URL}/move/{id_or_name}"
+
+
+def type_url(id_or_name: int | str) -> str:
+    return f"{POKEAPI_BASE_URL}/type/{id_or_name}"

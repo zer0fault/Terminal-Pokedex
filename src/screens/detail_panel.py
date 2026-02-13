@@ -9,10 +9,14 @@ from src.widgets.stats_tab import StatsTab
 from src.widgets.moves_tab import MovesTab
 from src.widgets.evolution_tab import EvolutionTab
 from src.widgets.abilities_tab import AbilitiesTab
+from src.widgets.breeding_tab import BreedingTab
+from src.widgets.type_tab import TypeTab
 from src.models.pokemon import PokemonDetail
 from src.models.species import PokemonSpecies
 from src.models.evolution import EvolutionChain
 from src.models.ability import Ability
+from src.models.move import Move
+from src.models.type_info import TypeEffectiveness
 from src.constants import GENERATION_MAP
 
 
@@ -32,10 +36,14 @@ class DetailPanel(Vertical):
                 yield StatsTab()
             with TabPane("Moves"):
                 yield MovesTab()
+            with TabPane("Type"):
+                yield TypeTab()
             with TabPane("Evolution"):
                 yield EvolutionTab()
             with TabPane("Abilities"):
                 yield AbilitiesTab()
+            with TabPane("Breeding"):
+                yield BreedingTab()
 
     def on_mount(self) -> None:
         self.show_empty_state()
@@ -54,7 +62,7 @@ class DetailPanel(Vertical):
         self,
         detail: PokemonDetail,
         species: PokemonSpecies | None = None,
-        sprite_pixels=None,
+        sprite_variants: dict | None = None,
     ) -> None:
         """Load Pokemon detail into the panel."""
         name_widget = self.query_one("#pokemon-name", Static)
@@ -81,13 +89,20 @@ class DetailPanel(Vertical):
             flavor_widget.update("")
 
         sprite_display = self.query_one(SpriteDisplay)
-        sprite_display.set_sprite(sprite_pixels)
+        if sprite_variants:
+            sprite_display.set_sprites(sprite_variants)
+        else:
+            sprite_display.clear_sprite()
 
         stats_tab = self.query_one(StatsTab)
         stats_tab.load_stats(detail.stats)
 
         moves_tab = self.query_one(MovesTab)
         moves_tab.load_moves(detail.moves)
+
+        if species:
+            breeding_tab = self.query_one(BreedingTab)
+            breeding_tab.load_data(detail, species)
 
     def load_evolution(self, chain: EvolutionChain, current_name: str) -> None:
         """Load evolution chain into the Evolution tab."""
@@ -105,3 +120,17 @@ class DetailPanel(Vertical):
         """Load abilities into the Abilities tab."""
         abilities_tab = self.query_one(AbilitiesTab)
         abilities_tab.load_abilities(detail.abilities, ability_details)
+
+    def load_move_details(self, detail: PokemonDetail, move_details: dict[str, Move]) -> None:
+        """Load move details into the Moves tab."""
+        moves_tab = self.query_one(MovesTab)
+        moves_tab.load_moves(detail.moves, move_details)
+
+    def load_type_matchups(
+        self,
+        detail: PokemonDetail,
+        type_data: dict[str, TypeEffectiveness],
+    ) -> None:
+        """Load type effectiveness into the Type tab."""
+        type_tab = self.query_one(TypeTab)
+        type_tab.load_type_matchups(detail, type_data)

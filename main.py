@@ -79,17 +79,27 @@ class PokedexApp(App):
             detail = await self._cache.get_pokemon_detail(event.pokemon_id)
             species = await self._cache.get_species(event.pokemon_id)
 
-            sprite_path = SPRITES_DIR / f"{event.pokemon_id}.png"
-            if not sprite_path.exists() and detail.sprite_url:
-                await self._sprite_downloader.download_sprite(
-                    detail.sprite_url, sprite_path
-                )
+            # Download and render all sprite variants
+            sprite_variants = {}
+            if detail.sprites:
+                sprite_mapping = {
+                    "front_default": detail.sprites.front_default,
+                    "front_shiny": detail.sprites.front_shiny,
+                    "back_default": detail.sprites.back_default,
+                    "back_shiny": detail.sprites.back_shiny,
+                }
 
-            sprite_pixels = None
-            if sprite_path.exists():
-                sprite_pixels = self._sprite_renderer.render(sprite_path)
+                for variant_name, url in sprite_mapping.items():
+                    if url:
+                        sprite_path = SPRITES_DIR / f"{event.pokemon_id}_{variant_name}.png"
+                        if not sprite_path.exists():
+                            await self._sprite_downloader.download_sprite(url, sprite_path)
 
-            detail_panel.load_pokemon(detail, species, sprite_pixels)
+                        if sprite_path.exists():
+                            pixels = self._sprite_renderer.render(sprite_path)
+                            sprite_variants[variant_name] = pixels
+
+            detail_panel.load_pokemon(detail, species, sprite_variants)
 
             chain_id = species.evolution_chain_id
             if chain_id:
@@ -105,6 +115,28 @@ class PokedexApp(App):
                     pass
 
             detail_panel.load_abilities(detail, ability_details)
+
+            # Fetch move details for first 20 moves (to avoid too many API calls)
+            move_details = {}
+            for move_ref in detail.moves[:20]:
+                try:
+                    move = await self._cache.get_move(move_ref.name)
+                    move_details[move_ref.name] = move
+                except Exception:
+                    pass
+
+            detail_panel.load_move_details(detail, move_details)
+
+            # Fetch type effectiveness data
+            type_data = {}
+            for poke_type in detail.types:
+                try:
+                    type_info = await self._cache.get_type(poke_type.name)
+                    type_data[poke_type.name] = type_info
+                except Exception:
+                    pass
+
+            detail_panel.load_type_matchups(detail, type_data)
 
         except Exception as e:
             self.notify(f"Error loading Pokemon: {e}", severity="error", timeout=5)

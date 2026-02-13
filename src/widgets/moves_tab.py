@@ -28,7 +28,11 @@ class MovesTab(Vertical):
         move_details: dict[str, Move] | None = None,
     ) -> None:
         """Populate the moves DataTable."""
+        import sys
+        print(f"DEBUG: load_moves called with {len(moves)} moves", file=sys.stderr, flush=True)
+
         table = self.query_one("#moves-table", DataTable)
+        print(f"DEBUG: Found table, clearing...", file=sys.stderr, flush=True)
         table.clear()
         self._move_details = move_details or {}
 
@@ -41,6 +45,7 @@ class MovesTab(Vertical):
             key=lambda m: (m.learn_method, m.name),
         )
 
+        rows_added = 0
         for move in level_up + others:
             name = move.name.replace("-", " ").title()
             level = str(move.level_learned_at) if move.level_learned_at > 0 else "-"
@@ -60,3 +65,6 @@ class MovesTab(Vertical):
                 pp = "-"
 
             table.add_row(name, move_type, power, accuracy, pp, level, method)
+            rows_added += 1
+
+        print(f"DEBUG: Added {rows_added} rows to table. Row count: {table.row_count}", file=sys.stderr, flush=True)

@@ -9,11 +9,19 @@ class MovesTab(DataTable):
     """Tab content showing a Pokemon's move list in a DataTable."""
 
     def __init__(self, **kwargs) -> None:
-        super().__init__(cursor_type="row", zebra_stripes=True, **kwargs)
+        super().__init__(
+            cursor_type="row",
+            zebra_stripes=True,
+            show_header=True,
+            show_row_labels=False,
+            **kwargs
+        )
         self._move_details: dict[str, Move] = {}
 
     def on_mount(self) -> None:
         self.add_columns("Move", "Type", "Power", "Acc", "PP", "Level", "Method")
+        # Add a test row to verify display works
+        self.add_row("TEST", "Fire", "100", "95", "15", "1", "Level Up")
 
     def load_moves(
         self,

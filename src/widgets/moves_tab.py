@@ -28,36 +28,48 @@ class MovesTab(Vertical):
         move_details: dict[str, Move] | None = None,
     ) -> None:
         """Populate the moves DataTable."""
-        table = self.query_one("#moves-table", DataTable)
-        table.clear()
-        self._move_details = move_details or {}
+        try:
+            table = self.query_one("#moves-table", DataTable)
+            table.clear()
+            self._move_details = move_details or {}
 
-        level_up = sorted(
-            [m for m in moves if m.learn_method == "level-up"],
-            key=lambda m: m.level_learned_at,
-        )
-        others = sorted(
-            [m for m in moves if m.learn_method != "level-up"],
-            key=lambda m: (m.learn_method, m.name),
-        )
+            if not moves:
+                return
 
-        for move in level_up + others:
-            name = move.name.replace("-", " ").title()
-            level = str(move.level_learned_at) if move.level_learned_at > 0 else "-"
-            method = move.learn_method.replace("-", " ").title()
+            level_up = sorted(
+                [m for m in moves if m.learn_method == "level-up"],
+                key=lambda m: m.level_learned_at,
+            )
+            others = sorted(
+                [m for m in moves if m.learn_method != "level-up"],
+                key=lambda m: (m.learn_method, m.name),
+            )
 
-            # Get move details if available
-            detail = self._move_details.get(move.name)
-            if detail:
-                move_type = detail.type_name.title()
-                power = str(detail.power) if detail.power else "-"
-                accuracy = str(detail.accuracy) if detail.accuracy else "-"
-                pp = str(detail.pp)
-            else:
-                # Show basic info even without detailed move data
-                move_type = "-"
-                power = "-"
-                accuracy = "-"
-                pp = "-"
+            for move in level_up + others:
+                name = move.name.replace("-", " ").title()
+                level = str(move.level_learned_at) if move.level_learned_at > 0 else "-"
+                method = move.learn_method.replace("-", " ").title()
 
-            table.add_row(name, move_type, power, accuracy, pp, level, method)
+                # Get move details if available
+                detail = self._move_details.get(move.name)
+                if detail:
+                    move_type = detail.type_name.title()
+                    power = str(detail.power) if detail.power else "-"
+                    accuracy = str(detail.accuracy) if detail.accuracy else "-"
+                    pp = str(detail.pp)
+                else:
+                    # Show basic info even without detailed move data
+                    move_type = "-"
+                    power = "-"
+                    accuracy = "-"
+                    pp = "-"
+
+                table.add_row(name, move_type, power, accuracy, pp, level, method)
+
+            # Force table refresh
+            table.refresh()
+        except Exception as e:
+            import sys
+            print(f"ERROR in load_moves: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()

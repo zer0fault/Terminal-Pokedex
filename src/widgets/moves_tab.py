@@ -21,6 +21,9 @@ class MovesTab(Vertical):
     def on_mount(self) -> None:
         table = self.query_one("#moves-table", DataTable)
         table.add_columns("Move", "Type", "Power", "Acc", "PP", "Level", "Method")
+        table.show_header = True
+        table.fixed_rows = 0
+        table.zebra_stripes = True
 
     def load_moves(
         self,
@@ -65,5 +68,9 @@ class MovesTab(Vertical):
 
             table.add_row(name, move_type, power, accuracy, pp, level, method)
             rows_added += 1
+
+        # Force refresh of table and container
+        table.refresh()
+        self.refresh()
 
         self.app.notify(f"Added {rows_added} rows. Table has {table.row_count} rows", timeout=3)

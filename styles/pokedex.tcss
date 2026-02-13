@@ -90,14 +90,33 @@ DetailPanel {
 
 #sprite-and-info {
     height: auto;
+    max-height: 30;
     margin-bottom: 1;
 }
 
 SpriteDisplay {
     width: 44;
     height: auto;
+    max-height: 28;
     background: #1e1e2e;
     padding: 0 1;
+}
+
+#sprite-controls {
+    height: 3;
+    width: 100%;
+}
+
+#sprite-controls Button {
+    min-width: 8;
+    max-width: 12;
+    height: 1;
+}
+
+#sprite-image {
+    height: auto;
+    max-height: 23;
+    overflow: hidden;
 }
 
 #pokemon-info {
@@ -115,6 +134,7 @@ SpriteDisplay {
 /* Tabbed content */
 #detail-tabs {
     height: 1fr;
+    min-height: 20;
 }
 
 TabbedContent {

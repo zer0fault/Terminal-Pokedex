@@ -22,7 +22,7 @@ CACHE_TTL_EVOLUTION = 86400 * 30
 CACHE_TTL_ABILITY = 86400 * 30
 
 # --- Sprite rendering ---
-SPRITE_RENDER_WIDTH = 40
+SPRITE_RENDER_WIDTH = 60  # Increased for better quality
 SPRITE_BG_COLOR = (30, 30, 46)
 
 # --- Pokemon type colors (hex) ---

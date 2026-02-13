@@ -22,10 +22,11 @@ class SpriteRenderer:
                 elif img.mode != "RGB":
                     img = img.convert("RGB")
 
+                # Better quality rendering with proper aspect ratio
                 aspect = img.height / img.width
-                height = int(width * aspect * 0.5)
+                height = int(width * aspect * 0.45)  # Adjusted for terminal character aspect
                 img = img.resize((width, height), Image.Resampling.LANCZOS)
 
-                return Pixels.from_image(img)
+                return Pixels.from_image(img, resize=(width, height))
         except Exception:
             return None

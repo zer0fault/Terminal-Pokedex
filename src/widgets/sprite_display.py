@@ -14,7 +14,24 @@ class SpriteDisplay(Vertical):
     SpriteDisplay {
         width: 44;
         height: auto;
+        max-height: 30;
         padding: 0 1;
+    }
+
+    #sprite-controls {
+        height: 3;
+        width: 100%;
+    }
+
+    #sprite-controls Button {
+        min-width: 10;
+        height: 1;
+        margin: 0 1;
+    }
+
+    #sprite-image {
+        height: auto;
+        max-height: 25;
     }
     """
 
@@ -25,9 +42,9 @@ class SpriteDisplay(Vertical):
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="sprite-controls"):
-            yield Button("Normal", id="btn-normal", variant="primary")
-            yield Button("Shiny", id="btn-shiny")
-            yield Button("Back", id="btn-back")
+            yield Button("Normal", id="btn-normal", variant="primary", classes="sprite-btn")
+            yield Button("Shiny", id="btn-shiny", classes="sprite-btn")
+            yield Button("Back", id="btn-back", classes="sprite-btn")
         yield Static("", id="sprite-image")
 
     def set_sprites(self, sprites: dict[str, Pixels | None]) -> None:

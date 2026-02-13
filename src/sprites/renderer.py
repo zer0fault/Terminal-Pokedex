@@ -15,19 +15,24 @@ class SpriteRenderer:
         """Render a sprite file with pixel-perfect scaling."""
         try:
             with Image.open(sprite_path) as img:
-                # Scale up 2x with NEAREST for crisp pixel art
-                scale = 2
-                scaled_size = (img.width * scale, img.height * scale)
-                img = img.resize(scaled_size, Image.Resampling.NEAREST)
-
+                # Handle transparency first
                 if img.mode == "RGBA":
-                    background = Image.new("RGBA", img.size, (*SPRITE_BG_COLOR, 255))
+                    background = Image.new("RGB", img.size, SPRITE_BG_COLOR)
                     background.paste(img, mask=img.split()[3])
-                    img = background.convert("RGB")
+                    img = background
                 elif img.mode != "RGB":
                     img = img.convert("RGB")
 
-                # Render at 2x size for better visibility while keeping pixel art crisp
+                # Scale up 2x with NEAREST for crisp pixel art
+                scale = 2
+                new_width = img.width * scale
+                new_height = img.height * scale
+                img = img.resize((new_width, new_height), Image.Resampling.NEAREST)
+
+                # Convert to Pixels for terminal display
                 return Pixels.from_image(img)
-        except Exception:
+        except Exception as e:
+            # Log error for debugging
+            import sys
+            print(f"Sprite render error: {e}", file=sys.stderr)
             return None

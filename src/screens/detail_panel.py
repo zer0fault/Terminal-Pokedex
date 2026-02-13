@@ -97,9 +97,9 @@ class DetailPanel(Vertical):
         stats_tab = self.query_one(StatsTab)
         stats_tab.load_stats(detail.stats)
 
-        # Don't load moves here - wait for move_details to be fetched
-        # moves_tab = self.query_one(MovesTab)
-        # moves_tab.load_moves(detail.moves)
+        # Load moves immediately with basic info (will be updated with details later)
+        moves_tab = self.query_one(MovesTab)
+        moves_tab.load_moves(detail.moves)
 
         if species:
             breeding_tab = self.query_one(BreedingTab)
@@ -123,10 +123,9 @@ class DetailPanel(Vertical):
         abilities_tab.load_abilities(detail.abilities, ability_details)
 
     def load_move_details(self, detail: PokemonDetail, move_details: dict[str, Move]) -> None:
-        """Load move details into the Moves tab."""
-        if not move_details:
-            return
+        """Update moves tab with detailed move information."""
         moves_tab = self.query_one(MovesTab)
+        # Reload with move details to update the table
         moves_tab.load_moves(detail.moves, move_details)
 
     def load_type_matchups(

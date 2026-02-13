@@ -12,27 +12,22 @@ class SpriteRenderer:
 
     @staticmethod
     def render(sprite_path: Path, width: int = SPRITE_RENDER_WIDTH) -> Pixels | None:
-        """Render a sprite file with pixel-perfect scaling."""
+        """Render a sprite file to Pixels."""
         try:
-            with Image.open(sprite_path) as img:
-                # Handle transparency first
-                if img.mode == "RGBA":
-                    background = Image.new("RGB", img.size, SPRITE_BG_COLOR)
-                    background.paste(img, mask=img.split()[3])
-                    img = background
-                elif img.mode != "RGB":
-                    img = img.convert("RGB")
+            img = Image.open(sprite_path)
 
-                # Scale up 2x with NEAREST for crisp pixel art
-                scale = 2
-                new_width = img.width * scale
-                new_height = img.height * scale
-                img = img.resize((new_width, new_height), Image.Resampling.NEAREST)
+            # Convert to RGB, handling transparency
+            if img.mode == "RGBA":
+                rgb_img = Image.new("RGB", img.size, SPRITE_BG_COLOR)
+                rgb_img.paste(img, mask=img.split()[3])
+                img = rgb_img
+            elif img.mode != "RGB":
+                img = img.convert("RGB")
 
-                # Convert to Pixels for terminal display
-                return Pixels.from_image(img)
+            # Return as Pixels (no resizing - use original size)
+            pixels = Pixels.from_image(img)
+            img.close()
+            return pixels
         except Exception as e:
-            # Log error for debugging
-            import sys
-            print(f"Sprite render error: {e}", file=sys.stderr)
+            print(f"Sprite render failed: {e}")
             return None

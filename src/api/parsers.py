@@ -5,13 +5,14 @@ from typing import Any
 from src.models.pokemon import (
     PokemonSummary, PokemonDetail, PokemonStat,
     PokemonType, PokemonAbilityRef, PokemonMoveRef,
-    PokemonHeldItem, PokemonSprites,
+    PokemonHeldItem, PokemonSprites, PokemonFormRef,
 )
 from src.models.species import PokemonSpecies
 from src.models.evolution import EvolutionChain, EvolutionNode, EvolutionTrigger
 from src.models.ability import Ability
 from src.models.move import Move
 from src.models.type_info import TypeEffectiveness
+from src.models.form import PokemonForm, PokemonFormSprites
 
 
 def parse_id_from_url(url: str) -> int:
@@ -106,6 +107,14 @@ def parse_pokemon_detail(data: dict[str, Any]) -> PokemonDetail:
             rarity=max_rarity,
         ))
 
+    forms = [
+        PokemonFormRef(
+            name=f["name"],
+            url=f["url"],
+        )
+        for f in data.get("forms", [])
+    ]
+
     return PokemonDetail(
         id=data["id"],
         name=data["name"],
@@ -116,6 +125,7 @@ def parse_pokemon_detail(data: dict[str, Any]) -> PokemonDetail:
         order=data.get("order", 0),
         sprite_url=sprite_url,
         sprites=sprites,
+        forms=forms,
         stats=stats,
         types=types,
         abilities=abilities,
@@ -282,4 +292,30 @@ def parse_type_effectiveness(data: dict[str, Any]) -> TypeEffectiveness:
         double_damage_from=[t["name"] for t in damage_relations.get("double_damage_from", [])],
         half_damage_from=[t["name"] for t in damage_relations.get("half_damage_from", [])],
         no_damage_from=[t["name"] for t in damage_relations.get("no_damage_from", [])],
+    )
+
+
+def parse_pokemon_form(data: dict[str, Any]) -> PokemonForm:
+    """Parse /pokemon-form/{id} response."""
+    sprite_data = data.get("sprites", {})
+
+    sprites = PokemonFormSprites(
+        front_default=sprite_data.get("front_default"),
+        front_shiny=sprite_data.get("front_shiny"),
+        back_default=sprite_data.get("back_default"),
+        back_shiny=sprite_data.get("back_shiny"),
+    )
+
+    types = [t["type"]["name"] for t in data.get("types", [])]
+
+    return PokemonForm(
+        id=data["id"],
+        name=data["name"],
+        form_name=data.get("form_name", ""),
+        is_default=data.get("is_default", False),
+        is_battle_only=data.get("is_battle_only", False),
+        is_mega=data.get("is_mega", False),
+        order=data.get("order", 0),
+        sprites=sprites,
+        types=types,
     )

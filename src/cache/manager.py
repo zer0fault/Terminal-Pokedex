@@ -120,6 +120,19 @@ class CacheManager:
         )
         return type_eff
 
+    async def get_pokemon_form(self, form_url: str) -> 'PokemonForm':
+        """Get Pokemon form details (cached)."""
+        from src.models.form import PokemonForm
+        from src.api.parsers import parse_pokemon_form
+
+        await self.initialize()
+        data = await self._api.get_json(form_url)
+        form = parse_pokemon_form(data)
+        await self._db.save_cached_json(
+            "form", form.id, data, name=form.name
+        )
+        return form
+
     async def close(self) -> None:
         """Clean up resources."""
         await self._api.close()

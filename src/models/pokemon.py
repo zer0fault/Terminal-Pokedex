@@ -63,6 +63,13 @@ class PokemonSprites:
 
 
 @dataclass(slots=True)
+class PokemonFormRef:
+    """Reference to a Pokemon form."""
+    name: str
+    url: str
+
+
+@dataclass(slots=True)
 class PokemonDetail:
     """Full Pokemon data from /pokemon/{id}."""
     id: int
@@ -74,6 +81,7 @@ class PokemonDetail:
     order: int
     sprite_url: str | None
     sprites: PokemonSprites | None = None
+    forms: list[PokemonFormRef] = field(default_factory=list)
     stats: list[PokemonStat] = field(default_factory=list)
     types: list[PokemonType] = field(default_factory=list)
     abilities: list[PokemonAbilityRef] = field(default_factory=list)

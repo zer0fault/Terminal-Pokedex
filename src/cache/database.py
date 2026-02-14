@@ -73,6 +73,13 @@ class CacheDatabase:
                 cached_at REAL NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS form (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                data_json TEXT NOT NULL,
+                cached_at REAL NOT NULL
+            );
+
             CREATE INDEX IF NOT EXISTS idx_pokemon_list_name
                 ON pokemon_list(name);
 
@@ -84,6 +91,9 @@ class CacheDatabase:
 
             CREATE INDEX IF NOT EXISTS idx_type_name
                 ON type(name);
+
+            CREATE INDEX IF NOT EXISTS idx_form_name
+                ON form(name);
         """)
         await self._db.commit()
 

@@ -126,6 +126,20 @@ SpriteDisplay {
     height: auto;
 }
 
+#form-selector {
+    height: auto;
+    margin: 1 0 0 0;
+}
+
+#form-label {
+    width: auto;
+    margin-right: 1;
+}
+
+#form-select {
+    width: 1fr;
+}
+
 #flavor-text {
     margin: 1 0;
     padding: 0 1;

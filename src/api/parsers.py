@@ -115,6 +115,10 @@ def parse_pokemon_detail(data: dict[str, Any]) -> PokemonDetail:
         for f in data.get("forms", [])
     ]
 
+    # Extract species ID from species URL
+    species_url = data.get("species", {}).get("url", "")
+    species_id = parse_id_from_url(species_url) if species_url else data["id"]
+
     return PokemonDetail(
         id=data["id"],
         name=data["name"],
@@ -123,6 +127,7 @@ def parse_pokemon_detail(data: dict[str, Any]) -> PokemonDetail:
         base_experience=data.get("base_experience"),
         is_default=data.get("is_default", True),
         order=data.get("order", 0),
+        species_id=species_id,
         sprite_url=sprite_url,
         sprites=sprites,
         forms=forms,

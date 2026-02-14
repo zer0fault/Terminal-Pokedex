@@ -79,6 +79,7 @@ class PokemonDetail:
     base_experience: int | None
     is_default: bool
     order: int
+    species_id: int  # The species ID (may differ from pokemon ID for forms)
     sprite_url: str | None
     sprites: PokemonSprites | None = None
     forms: list[PokemonFormRef] = field(default_factory=list)

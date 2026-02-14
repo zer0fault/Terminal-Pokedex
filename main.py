@@ -90,11 +90,11 @@ class PokedexApp(App):
         detail_panel = self.query_one(DetailPanel)
 
         try:
-            # Phase 1: Fetch core Pokemon data in parallel
-            detail, species = await asyncio.gather(
-                self._cache.get_pokemon_detail(event.pokemon_id),
-                self._cache.get_species(event.pokemon_id)
-            )
+            # Phase 1: Fetch core Pokemon data
+            detail = await self._cache.get_pokemon_detail(event.pokemon_id)
+
+            # Fetch species using the species_id (handles form variants correctly)
+            species = await self._cache.get_species(detail.species_id)
 
             # Download and render all sprite variants in parallel
             sprite_variants = {}

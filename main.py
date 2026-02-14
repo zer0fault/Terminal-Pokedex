@@ -57,15 +57,29 @@ class PokedexApp(App):
         """Load type and generation data for all Pokemon in the background."""
         async def load_metadata():
             list_panel = self.query_one(PokemonListPanel)
-            for pokemon in pokemon_list[:50]:  # Load first 50 for now
+            failed_count = 0
+            total = len(pokemon_list)
+
+            for idx, pokemon in enumerate(pokemon_list, 1):
                 try:
                     detail = await self._cache.get_pokemon_detail(pokemon.id)
                     species = await self._cache.get_species(pokemon.id)
                     type_names = [t.name for t in detail.types]
                     list_panel.set_type_data(pokemon.id, type_names)
                     list_panel.set_gen_data(pokemon.id, species.generation)
-                except Exception:
-                    pass
+
+                    # Update status every 50 Pokemon
+                    if idx % 50 == 0:
+                        list_panel.update_status(f"Loading metadata... {idx}/{total}")
+                except Exception as e:
+                    failed_count += 1
+                    self.log.warning(f"Failed to load metadata for {pokemon.name} (#{pokemon.id}): {e}")
+                    # Continue loading others instead of stopping
+
+            if failed_count > 0:
+                self.log.error(f"Failed to load metadata for {failed_count}/{total} Pokemon")
+
+            list_panel.update_status(f"{total} Pokemon")
 
         asyncio.create_task(load_metadata())
 
@@ -107,23 +121,33 @@ class PokedexApp(App):
                 detail_panel.load_evolution(evolution_chain, event.pokemon_name)
 
             ability_details = {}
+            ability_failed = 0
             for ability_ref in detail.abilities:
                 try:
                     ability = await self._cache.get_ability(ability_ref.name)
                     ability_details[ability_ref.name] = ability
-                except Exception:
-                    pass
+                except Exception as e:
+                    ability_failed += 1
+                    self.log.warning(f"Failed to load ability {ability_ref.name}: {e}")
+
+            if ability_failed > 0:
+                self.log.error(f"Failed to load {ability_failed} abilities for {event.pokemon_name}")
 
             detail_panel.load_abilities(detail, ability_details)
 
             # Fetch move details for first 20 moves (to avoid too many API calls)
             move_details = {}
+            move_failed = 0
             for move_ref in detail.moves[:20]:
                 try:
                     move = await self._cache.get_move(move_ref.name)
                     move_details[move_ref.name] = move
-                except Exception:
-                    pass  # Silently skip failed moves
+                except Exception as e:
+                    move_failed += 1
+                    self.log.warning(f"Failed to load move {move_ref.name}: {e}")
+
+            if move_failed > 0:
+                self.log.error(f"Failed to load {move_failed} moves for {event.pokemon_name}")
 
             if move_details:
                 detail_panel.load_move_details(detail, move_details)

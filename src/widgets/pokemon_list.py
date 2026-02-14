@@ -110,3 +110,8 @@ class PokemonListPanel(Vertical):
         self._current_gen = event.generation
         self._current_type = event.type_name
         self._apply_filters()
+
+    def update_status(self, message: str) -> None:
+        """Update the status bar message."""
+        status = self.query_one("#list-status", Static)
+        status.update(f"[dim]{message}[/dim]")

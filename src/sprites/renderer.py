@@ -1,10 +1,13 @@
 """Sprite rendering using Pillow and rich-pixels."""
+import logging
 from pathlib import Path
 
 from PIL import Image
 from rich_pixels import Pixels
 
 from src.constants import SPRITE_RENDER_WIDTH
+
+logger = logging.getLogger(__name__)
 
 
 class SpriteRenderer:
@@ -34,5 +37,5 @@ class SpriteRenderer:
             img.close()
             return pixels
         except Exception as e:
-            print(f"Sprite render failed: {e}")
+            logger.error(f"Sprite render failed for {sprite_path}: {e}")
             return None

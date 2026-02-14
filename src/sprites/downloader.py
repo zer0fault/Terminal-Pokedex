@@ -1,9 +1,12 @@
 """Sprite downloader with disk caching."""
+import logging
 from pathlib import Path
 
 from src.api.client import PokeAPIClient
 from src.api.endpoints import sprite_url
 from src.constants import SPRITES_DIR
+
+logger = logging.getLogger(__name__)
 
 
 class SpriteDownloader:
@@ -26,7 +29,8 @@ class SpriteDownloader:
             image_bytes = await self._api.get_bytes(sprite_url(pokemon_id))
             path.write_bytes(image_bytes)
             return path
-        except Exception:
+        except Exception as e:
+            logger.error(f"Failed to download sprite for Pokemon #{pokemon_id}: {e}")
             return None
 
     async def download_sprite(self, url: str, path: Path) -> None:
@@ -34,5 +38,5 @@ class SpriteDownloader:
         try:
             image_bytes = await self._api.get_bytes(url)
             path.write_bytes(image_bytes)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to download sprite from {url}: {e}")

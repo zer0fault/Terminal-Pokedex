@@ -11,7 +11,6 @@ from src.widgets.evolution_tab import EvolutionTab
 from src.widgets.abilities_tab import AbilitiesTab
 from src.widgets.breeding_tab import BreedingTab
 from src.widgets.type_tab import TypeTab
-from src.widgets.form_selector import FormSelector
 from src.models.pokemon import PokemonDetail
 from src.models.species import PokemonSpecies
 from src.models.evolution import EvolutionChain
@@ -31,7 +30,6 @@ class DetailPanel(Vertical):
                 yield Static("", id="pokemon-name")
                 yield Static("", id="pokemon-types")
                 yield Static("", id="pokemon-details")
-                yield FormSelector(id="form-selector")
         yield Static("", id="flavor-text")
         with TabbedContent(id="detail-tabs"):
             with TabPane("Stats"):
@@ -106,11 +104,6 @@ class DetailPanel(Vertical):
         if species:
             breeding_tab = self.query_one(BreedingTab)
             breeding_tab.load_data(detail, species)
-
-        # Load form selector if Pokemon has multiple forms
-        form_selector = self.query_one(FormSelector)
-        forms_list = [(f.name, f.url) for f in detail.forms]
-        form_selector.load_forms(forms_list)
 
     def load_evolution(self, chain: EvolutionChain, current_name: str) -> None:
         """Load evolution chain into the Evolution tab."""

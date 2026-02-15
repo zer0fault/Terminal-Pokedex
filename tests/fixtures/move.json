@@ -1,0 +1,51 @@
+{
+  "id": 84,
+  "name": "thunder-shock",
+  "accuracy": 100,
+  "effect_chance": 10,
+  "pp": 30,
+  "priority": 0,
+  "power": 40,
+  "type": {
+    "name": "electric",
+    "url": "https://pokeapi.co/api/v2/type/13/"
+  },
+  "damage_class": {
+    "name": "special",
+    "url": "https://pokeapi.co/api/v2/move-damage-class/3/"
+  },
+  "effect_entries": [
+    {
+      "effect": "Inflicts regular damage. Has a 10% chance to paralyze the target.",
+      "short_effect": "Has a 10% chance to paralyze the target.",
+      "language": {
+        "name": "en",
+        "url": "https://pokeapi.co/api/v2/language/9/"
+      }
+    }
+  ],
+  "target": {
+    "name": "selected-pokemon",
+    "url": "https://pokeapi.co/api/v2/move-target/10/"
+  },
+  "meta": {
+    "ailment": {
+      "name": "paralysis",
+      "url": "https://pokeapi.co/api/v2/move-ailment/1/"
+    },
+    "category": {
+      "name": "damage+ailment",
+      "url": "https://pokeapi.co/api/v2/move-category/4/"
+    },
+    "min_hits": null,
+    "max_hits": null,
+    "min_turns": null,
+    "max_turns": null,
+    "drain": 0,
+    "healing": 0,
+    "crit_rate": 0,
+    "ailment_chance": 10,
+    "flinch_chance": 0,
+    "stat_chance": 0
+  }
+}

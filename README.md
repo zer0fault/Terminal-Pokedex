@@ -10,14 +10,16 @@ A terminal user interface (TUI) for browsing Pokemon data using the PokeAPI.
 - 🔄 **Evolution Chains**: Visual evolution tree with trigger conditions
 - ⚡ **Abilities**: Full ability descriptions and effects
 - 📝 **Move List**: Sortable table of all learnable moves
-- 💾 **Smart Caching**: SQLite database cache for fast offline access
+- 💾 **Smart Caching**: SQLite database + LRU sprite cache (75 sprite limit)
+- ✅ **API Validation**: Pydantic schema validation for reliable data parsing
 - 🎯 **Type Colors**: Color-coded type badges
+- 🔀 **Form Variants**: Support for alternate Pokemon forms (Mega, Alolan, etc.)
 
 ## Installation
 
 ### Requirements
 
-- Python 3.11+
+- Python 3.10+
 - pip
 
 ### Setup
@@ -55,6 +57,15 @@ python main.py
 - **Type Filter**: Filter Pokemon by type (Fire, Water, Grass, etc.)
 - **Search**: Search by Pokemon name or ID
 
+## Testing
+
+Run the test suite:
+```bash
+python -m pytest tests/ -v
+```
+
+Tests cover API parsers, schema validation, and LRU cache logic using fixture data (no live API calls).
+
 ## Architecture
 
 ```
@@ -64,13 +75,15 @@ Terminal-Pokedex/
 │   ├── api/               # PokeAPI client and parsers
 │   ├── cache/             # SQLite caching layer
 │   ├── models/            # Data models
+│   ├── schemas/           # Pydantic validation schemas
 │   ├── screens/           # Main UI screens
-│   ├── sprites/           # Sprite download and rendering
+│   ├── sprites/           # Sprite download and LRU cache
 │   ├── widgets/           # Reusable UI widgets
 │   ├── utils/             # Utility functions
 │   └── constants.py       # App constants and configuration
 ├── styles/
 │   └── pokedex.tcss      # Textual CSS styling
+├── tests/                 # Test suite
 └── data/                  # Cache and sprites (generated)
 ```
 
@@ -82,6 +95,8 @@ Terminal-Pokedex/
 - **[httpx](https://www.python-httpx.org/)**: Async HTTP client
 - **[aiosqlite](https://aiosqlite.omnilib.dev/)**: Async SQLite
 - **[Pillow](https://python-pillow.org/)**: Image processing
+- **[Pydantic](https://docs.pydantic.dev/)**: Data validation
+- **[pytest](https://pytest.org/)**: Testing framework
 - **[PokeAPI](https://pokeapi.co/)**: Pokemon data source
 
 ## License

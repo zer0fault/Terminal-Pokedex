@@ -1,0 +1,32 @@
+{
+  "id": 9,
+  "name": "static",
+  "is_main_series": true,
+  "generation": {
+    "name": "generation-iii",
+    "url": "https://pokeapi.co/api/v2/generation/3/"
+  },
+  "effect_entries": [
+    {
+      "effect": "Whenever a move makes contact with this Pokémon, the move's user has a 30% chance of being paralyzed.",
+      "short_effect": "Has a 30% chance of paralyzing attacking Pokémon on contact.",
+      "language": {
+        "name": "en",
+        "url": "https://pokeapi.co/api/v2/language/9/"
+      }
+    }
+  ],
+  "flavor_text_entries": [
+    {
+      "flavor_text": "May paralyze on contact.",
+      "language": {
+        "name": "en",
+        "url": "https://pokeapi.co/api/v2/language/9/"
+      },
+      "version_group": {
+        "name": "ruby-sapphire",
+        "url": "https://pokeapi.co/api/v2/version-group/5/"
+      }
+    }
+  ]
+}

@@ -1,6 +1,9 @@
 """Parse PokeAPI JSON responses into dataclass models."""
+import logging
 import re
 from typing import Any
+
+from pydantic import ValidationError
 
 from src.models.pokemon import (
     PokemonSummary, PokemonDetail, PokemonStat,
@@ -13,6 +16,12 @@ from src.models.ability import Ability
 from src.models.move import Move
 from src.models.type_info import TypeEffectiveness
 from src.models.form import PokemonForm, PokemonFormSprites
+from src.schemas import pokemon as pokemon_schema
+from src.schemas import species as species_schema
+from src.schemas import ability as ability_schema
+from src.schemas import move as move_schema
+
+logger = logging.getLogger(__name__)
 
 
 def parse_id_from_url(url: str) -> int:
@@ -35,7 +44,14 @@ def parse_pokemon_list(data: dict[str, Any]) -> list[PokemonSummary]:
 
 
 def parse_pokemon_detail(data: dict[str, Any]) -> PokemonDetail:
-    """Parse /pokemon/{id} response."""
+    """Parse /pokemon/{id} response with schema validation."""
+    # Validate response schema
+    try:
+        validated = pokemon_schema.PokemonDetailSchema(**data)
+    except ValidationError as e:
+        logger.error(f"Pokemon detail validation failed: {e}")
+        raise ValueError(f"Invalid Pokemon detail response: {e.error_count()} errors") from e
+
     stats = [
         PokemonStat(
             name=s["stat"]["name"],
@@ -147,7 +163,14 @@ def _clean_flavor_text(text: str) -> str:
 
 
 def parse_pokemon_species(data: dict[str, Any]) -> PokemonSpecies:
-    """Parse /pokemon-species/{id} response."""
+    """Parse /pokemon-species/{id} response with schema validation."""
+    # Validate response schema
+    try:
+        validated = species_schema.SpeciesSchema(**data)
+    except ValidationError as e:
+        logger.error(f"Pokemon species validation failed: {e}")
+        raise ValueError(f"Invalid species response: {e.error_count()} errors") from e
+
     flavor_text = ""
     for entry in reversed(data.get("flavor_text_entries", [])):
         if entry["language"]["name"] == "en":
@@ -232,7 +255,14 @@ def parse_evolution_chain(data: dict[str, Any]) -> EvolutionChain:
 
 
 def parse_ability(data: dict[str, Any]) -> Ability:
-    """Parse /ability/{id} response."""
+    """Parse /ability/{id} response with schema validation."""
+    # Validate response schema
+    try:
+        validated = ability_schema.AbilitySchema(**data)
+    except ValidationError as e:
+        logger.error(f"Ability validation failed: {e}")
+        raise ValueError(f"Invalid ability response: {e.error_count()} errors") from e
+
     effect = ""
     short_effect = ""
     for entry in data.get("effect_entries", []):
@@ -257,7 +287,14 @@ def parse_ability(data: dict[str, Any]) -> Ability:
 
 
 def parse_move(data: dict[str, Any]) -> Move:
-    """Parse /move/{id} response."""
+    """Parse /move/{id} response with schema validation."""
+    # Validate response schema
+    try:
+        validated = move_schema.MoveSchema(**data)
+    except ValidationError as e:
+        logger.error(f"Move validation failed: {e}")
+        raise ValueError(f"Invalid move response: {e.error_count()} errors") from e
+
     effect = ""
     short_effect = ""
     for entry in data.get("effect_entries", []):
